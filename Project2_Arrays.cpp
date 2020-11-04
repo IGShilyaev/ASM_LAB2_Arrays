@@ -48,10 +48,10 @@ int main()
 	}
 	short interRes[100];
 	
-	short lengthDiff = length1;
-	for (int i = 0; i < length1; i++)
+	short lengthDiff = length2;
+	for (int i = 0; i < length2; i++)
 	{
-		if (find(arr2, arr2 + length2, arr1[i]) != arr2 + length2) lengthDiff--;
+		if (find(arr1, arr1 + length1, arr2[i]) != arr1 + length1) lengthDiff--;
 	}
 	short diffRes[100];
 	
@@ -76,6 +76,12 @@ int main()
 		lea ebx, arr2
 		lea edx, interRes
 		CALL FindIntersec
+
+		xor ebx, ebx
+		xor edx, edx
+		lea ebx, arr2
+		lea edx, diffRes
+		CALL FindDiff
 
 		jmp fullFinish
 
@@ -167,7 +173,7 @@ int main()
 
 			//______________Union - Begin_________________
 #pragma region Union
-
+		//________________Union - Begin__________________
 		Union:		   //Операция объединения множеств
 					   //На старте первый одномерный массив в ebx, unionRes в eax
 					   //Элементы, входящие в объединение, записываются в unionRes
@@ -214,7 +220,7 @@ int main()
 		pop dx
 		pop cx
 		RET
-
+		//________________Union - END___________________
 #pragma endregion
 			//______________Union - END__________________
 
@@ -257,7 +263,7 @@ int main()
 			//______________ContainsCheck - END
 
 
-			//______________ FindInersec - Begin_________________
+			//______________FindInersec - Begin_________________
 #pragma region Intersection
 				// Операция пересечения множеств
 				// На входе введенные массивы в eax и в ebx;
@@ -275,7 +281,7 @@ int main()
 			jz skipIntersec
 			mov di, [ebx]
 			mov [edx], di
-			add ed=x, 2
+			add edx, 2
 
 			skipIntersec:
 			add ebx, 2
@@ -291,22 +297,69 @@ int main()
 		RET
 
 #pragma endregion
-			//______________ FindInersec - END_________________
+			//______________FindInersec - END_________________
 
 
+			//______________FindDiff - Begin________________
+#pragma region FindDiff
+
+		FindDiff:
+		push cx
+		push dx
+
+		mov cx, length2
+		push cx
+
+		FillDiff:
+		CALL ContainsCheck
+		and si, si
+		jnz skipDiff
+
+		mov di, [ebx]
+		mov [edx], di
+		add edx, 2
+
+		skipDiff:
+		add ebx,2
+		dec cx
+		and cx,cx
+		jnz FillDiff
+
+		pop cx
+		mov length2, cx
+		pop dx
+		pop cx
+
+		RET
+
+#pragma endregion=
+			//______________FindDiff - END__________________
 	fullFinish:
 	}
 
-	cout << searchRes[0] << '\n' << searchRes[1] << endl;
+	if (searchRes[0] == 0) cout << "Result of the search in first array: Not Found";
+	else cout << "Result of the search in first array: Element is Found; Position number " << searchRes[0];
+	cout << endl;
+	if (searchRes[1] == 0) cout << "Result of the search in second array: Not Found";
+	else cout << "Result of the search in first array: Element is Found; Position number " << searchRes[1];
+	cout << endl << endl;
+
+
+	cout << "Array_1 and Array_2 ||| Union:" << endl;
 	for (int i = 0; i < lengthUnion; i++)
 		cout << unionRes[i] << ' ';
-	cout << endl;
+	cout << endl << endl;
+
+
+	cout << "Array_1 and Array_2 ||| Intersection:" << endl;
 	for (int i = 0; i < lengthIntersect; i++)
 		cout << interRes[i] << ' ';
-	cout << endl;
+	cout << endl << endl;
+
+
+	cout << "Array_2 - Array_1 ||| Difference:" << endl;
 	for (int i = 0; i < lengthDiff; i++)
-		cout << interRes[i] << ' ';
-	cout << endl;
+		cout << diffRes[i] << ' ';
+	cout << endl << endl;
 	return 0;
 }
-
